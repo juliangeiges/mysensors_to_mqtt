@@ -125,11 +125,19 @@ class MysensorsSerial
             message = @serial_port.gets
             $logger.debug(message)
             puts message if @settings.debug
+            serial_message_parser(message)
         end
         
     end
 
-
+    def serial_message_parser(serial_message)
+        if serial_message
+            splitted_message = serial_message.split(';')
+            puts splitted_message
+        else
+            $logger.debug("empty serial message has been given")
+        end
+    end
 
     #close the serial connection
     def close_connection
