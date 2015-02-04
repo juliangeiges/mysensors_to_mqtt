@@ -2,8 +2,10 @@ require 'bundler/setup'
 require 'logger'
 require 'settingslogic'
 
+require_relative 'lib/message'
 require_relative 'lib/mysensors_serial'
 require_relative 'models/node'
+
 
 $pwd  = File.dirname(File.expand_path(__FILE__))
 $logger = Logger.new('logs/mysensors_to_mqtt.log', 'weekly')
@@ -29,9 +31,11 @@ begin
 
 rescue Interrupt
     serial.close_connection
-    logger.close
+    $logger.close
 rescue Exception => e
     puts e
-    $logger.error(e)
+    #$logger.error(e)
+    serial.close_connection if $serial
+    #$logger.close if $logger
 end
 
