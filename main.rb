@@ -25,6 +25,7 @@ $logger.level = Logger.const_get Settings.main.logger_level
 # puts Node.all.map {|x| x.id}
 
 # begin 
+    @mqtt = Mqtt.new(Settings.mqtt)
 
     serial = MysensorsSerial.new(Settings.serial)
 
