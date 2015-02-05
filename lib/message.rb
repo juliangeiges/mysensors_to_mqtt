@@ -131,7 +131,50 @@ class Message
     end
 
     def message_internal
+        case @splitt_message[4] #message subtype
+            when 0
+                #todo
+                # look up node id etc.. and send to mqtt
+                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+            when 1
+                #todo
+                # don`t know how to implement, never seen a message like this
+                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+            when 2
+                #todo
+                # look up node id etc. and send to mqtt
+                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+            when 3
+                #todo
+                # Create a new node in storage and response id to node
+                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+            when 4
+                # should not an incoming message, therefore no need for implementation here
+                $logger.info("Gateway sent has given id to node #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}}: #{@message_content}")
+            when 5
 
+
+            when 6
+
+            when 7
+
+            when 8
+
+            when 9
+
+            when 10
+
+            when 11
+
+            when 12
+
+            when 13
+
+            when 14
+
+            else
+                $logger.error("unkown internal message: #{@message_content}")
+        end
 
     end
 
