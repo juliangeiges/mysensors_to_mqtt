@@ -107,75 +107,93 @@ class Message
     def initialize(message_content)
         @message_content = message_content
         @splitted_message = Message.splitt_message(@message_content)
-        @message_type = message_type
+        @message_type = MESSAGE_TYPES.invert[@splitted_message[2].to_i]
+        
+        case @message_type
+            when :presentation
+                #todo
+                log_because_not_implemented("message_type presentation", @message_content)
+            when :set
+                 log_because_not_implemented("message_type set", @message_content)
+            when :req
+                 log_because_not_implemented("message_type req", @message_content)
+            when :internal
+                #log_because_not_implemented("message_type internal", @message_content)
+                message_internal
+            else
+                log_because_not_implemented("message_type", @message_content)
+        end 
     end
 
     def self.new(message_content)
-        return false if !Message.parseable?(message_content)
-        super(message_content)
-    end
-
-    def message_type
-        case @splitted_message[2]
-            when 0
-                MESSAGE_TYPES.invert[splitted_message]
-            when 1
-                MESSAGE_TYPES.invert[splitted_message]
-            when 2
-                MESSAGE_TYPES.invert[splitted_message]
-            when 3
-                MESSAGE_TYPES.invert[splitted_message]
-            when 4
-                MESSAGE_TYPES.invert[splitted_message]
+        if !Message.parseable?(message_content)
+            return false
+        else
+            super(message_content)
         end
     end
 
     def message_internal
-        case @splitt_message[4] #message subtype
+        case @splitted_message[4].to_i #message subtype
             when 0
                 #todo
                 # look up node id etc.. and send to mqtt
-                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+                log_because_not_implemented("internal message", @message_conent)
             when 1
                 #todo
                 # don`t know how to implement, never seen a message like this
-                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+                log_because_not_implemented("internal message", @message_conent)
             when 2
                 #todo
                 # look up node id etc. and send to mqtt
-                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+                log_because_not_implemented("internal message", @message_conent)
             when 3
                 #todo
                 # Create a new node in storage and response id to node
-                $logger.error("not implemented message_type: #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}} for message: #{@message_content}")
+                log_because_not_implemented("internal message", @message_conent)
             when 4
                 # should not an incoming message, therefore no need for implementation here
-                $logger.info("Gateway sent has given id to node #{@splitt_message}/#{{INTERNALS.invert[@splitt_message]}}: #{@message_content}")
+                log_because_not_implemented("internal message", @message_conent)
             when 5
-
-
+                # inclution mode needs not to be implemented
+               log_because_not_implemented("internal message", @message_conent)
             when 6
-
+                #todo
+                # answer with metric
+                log_because_not_implemented("internal message", @message_conent)
             when 7
-
+                # no need for implementation
+                log_because_not_implemented("internal message", @message_conent)
             when 8
-
+                # no need for implementation
+                log_because_not_implemented("internal message", @message_conent)
             when 9
-
+                #don`t know how to implement that
+                log_because_not_implemented("internal message", @message_conent)
             when 10
-
+                # no need for implementation
+                log_because_not_implemented("internal message", @message_conent)
             when 11
-
+                 #don`t know how to implement that
+                log_because_not_implemented("internal message", @message_conent)
             when 12
-
+                 #don`t know how to implement that
+                log_because_not_implemented("internal message", @message_conent)
             when 13
-
+                # at the moment no OTA updates, so no implementation needed
+                log_because_not_implemented("internal message", @message_conent)
             when 14
-
+                # todo
+                # send a to mqtt that gateway is ready
+                log_because_not_implemented("internal message", @message_conent)
             else
                 $logger.error("unkown internal message: #{@message_content}")
         end
 
+    end
+
+    def log_because_not_implemented(thing, message)
+        $logger.error("not implemented #{thing} for message: #{message}")
     end
 
 

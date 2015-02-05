@@ -3,8 +3,10 @@ require 'logger'
 require 'settingslogic'
 
 require_relative 'lib/message'
+require_relative 'lib/mqtt'
 require_relative 'lib/mysensors_serial'
 require_relative 'models/node'
+
 
 
 $pwd  = File.dirname(File.expand_path(__FILE__))
@@ -22,20 +24,20 @@ $logger.level = Logger.const_get Settings.main.logger_level
 # node.save!
 # puts Node.all.map {|x| x.id}
 
-begin 
+# begin 
 
     serial = MysensorsSerial.new(Settings.serial)
 
     serial.reader
     
 
-rescue Interrupt
-    serial.close_connection
-    $logger.close
-rescue Exception => e
-    puts e
-    #$logger.error(e)
-    serial.close_connection if $serial
-    #$logger.close if $logger
-end
+# rescue Interrupt
+#     serial.close_connection
+#     $logger.close
+# rescue Exception => e
+#     puts e
+#     #$logger.error(e)
+#     serial.close_connection if $serial
+#     #$logger.close if $logger
+# end
 
