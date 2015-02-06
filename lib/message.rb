@@ -104,17 +104,30 @@ class Message
         :I_GATEWAY_READY => 14,  #Send by gateway to controller when startup is complete.
     }
 
-    def initialize(message_content, serial, mqtt)
+    def initialize(message_content, serial, mqtt, output)
+        @output = output
         @mqtt = mqtt
         @serial = serial
         @message_content = message_content
-        @splitted_message = Message.splitt_message(@message_content)
-        @node_id = @splitted_message[0]
-        @child_sensor_id=  @splitted_message[1]
-        @message_type = MESSAGE_TYPES.invert[@splitted_message[2].to_i]
-        @ack = @splitted_message[3]
-        @sub_type =  sub_type
-        @payload = @splitted_message[5]
+        #parse serial message
+        if !@output
+            @splitted_message = Message.splitt_message(@message_content)
+            @node_id = @splitted_message[0]
+            @child_sensor_id=  @splitted_message[1]
+            @message_type = MESSAGE_TYPES.invert[@splitted_message[2].to_i]
+            @ack = @splitted_message[3]
+            @sub_type =  sub_type
+            @payload = @splitted_message[5]
+        #parse mqtt message
+        else
+            @splitted_message = Message.splitt_mqtt_message(@message_content)
+            @node_id = @splitted_message[1]
+            @child_sensor_id=  @splitted_message[2]
+            @message_type = @splitted_message[3].to_sym #MESSAGE_TYPES.invert[@splitted_message[2].to_i]
+            @ack = @splitted_message[4]
+            @sub_type =  @splitted_message[5].to_sym
+            @payload = @splitted_message[6]
+        end
 
         case @message_type
             when :presentation
@@ -131,11 +144,20 @@ class Message
         end 
     end
 
-    def self.new(message_content, serial,  mqtt)
-        if !Message.parseable?(message_content)
-            return false
+    def self.new(message_content, serial,  mqtt, output)
+        if !output
+            if !Message.parseable?(message_content)
+                return false
+            else
+                super(message_content, serial, mqtt, output)
+            end
         else
-            super(message_content, serial, mqtt)
+            if !Message.mqtt_parseable?(message_content)
+                return false
+
+            else
+                super(message_content, serial, mqtt, output )
+            end
         end
     end
 
@@ -172,69 +194,76 @@ class Message
     end
 
     def message_presentation
-        if @serial.ready?
+        if @serial.ready? && @output.nil?
             node = Node.get(@node_id.to_i)
             node.set_sub_type(@child_sensor_id.to_i, @sub_type)
-            @mqtt.put("#{@node_id}/#{@child_sensor_id}/presentation", "#{@sub_type}")
+            #@mqtt.put("#{@node_id}/#{@child_sensor_id}/presentation", "#{@sub_type}")
+            send_mqtt_msg
         end
     end
 
     def message_set
         if @serial.ready?
-            #acutally only input is supperted
-            @mqtt.put("#{@node_id}/#{@child_sensor_id}/set/#{@sub_type}", "#{@payload}" )
+            if @output
+                send_serial_msg()
+            else
+                #@mqtt.put("#{@node_id}/#{@child_sensor_id}/set/#{@sub_type}", "#{@payload}" )
+                send_mqtt_msg()
+            end
         end
     end
 
     def message_internal
-        case @sub_type #message subtype
-            when :I_BATTERY_LEVEL
-                #todo
-                # look up node id etc.. and send to mqtt
-                log_because_not_implemented("internal message", @message_content)
-            when :I_TIME
-                #todo
-                # don`t know how to implement, never seen a message like this
-                log_because_not_implemented("internal message", @message_content)
-            when :I_VERSION
-                #todo
-                # look up node id etc. and send to mqtt
-                log_because_not_implemented("internal message", @message_content)
-            when :I_ID_REQUEST    
-                i_id_request() if @serial.ready?
-            when :I_ID_RESPONSE
-                # should not an incoming message, therefore no need for implementation here
-                log_because_not_implemented("internal message", @message_content)
-            when :I_INCLUSION_MODE
-                # inclution mode needs not to be implemented
-               log_because_not_implemented("internal message", @message_content)
-            when :I_CONFIG
-                #todo
-                # answer with metric
-                log_because_not_implemented("internal message", @message_content)
-            when :I_FIND_PARENT
-                # no need for implementation
-                log_because_not_implemented("internal message", @message_content)
-            when :I_FIND_PARENT_RESPONSE
-                # no need for implementation
-                log_because_not_implemented("internal message", @message_content)
-            when :I_LOG_MESSAGE
-                #don`t know how to implement that
-                log_because_not_implemented("internal message", @message_content)
-            when :I_CHILDREN
-                # no need for implementation
-                log_because_not_implemented("internal message", @message_content)
-            when :I_SKETCH_NAME
-                 i_sketch_name if @serial.ready?
-            when :I_SKETCH_VERSION
-                 i_sketch_version if @serial.ready?
-            when :I_REBOOT
-                # at the moment no OTA updates, so no implementation needed
-                log_because_not_implemented("internal message", @message_content)
-            when :I_GATEWAY_READY
-                i_gateway_ready
-            else
-                $logger.error("unkown internal message: #{@message_content}")
+        if !@output
+            case @sub_type #message subtype
+                when :I_BATTERY_LEVEL
+                    #todo
+                    # look up node id etc.. and send to mqtt
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_TIME
+                    #todo
+                    # don`t know how to implement, never seen a message like this
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_VERSION
+                    #todo
+                    # look up node id etc. and send to mqtt
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_ID_REQUEST    
+                    i_id_request() if @serial.ready?
+                when :I_ID_RESPONSE
+                    # should not an incoming message, therefore no need for implementation here
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_INCLUSION_MODE
+                    # inclution mode needs not to be implemented
+                   log_because_not_implemented("internal message", @message_content)
+                when :I_CONFIG
+                    #todo
+                    # answer with metric
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_FIND_PARENT
+                    # no need for implementation
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_FIND_PARENT_RESPONSE
+                    # no need for implementation
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_LOG_MESSAGE
+                    #don`t know how to implement that
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_CHILDREN
+                    # no need for implementation
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_SKETCH_NAME
+                     i_sketch_name if @serial.ready?
+                when :I_SKETCH_VERSION
+                     i_sketch_version if @serial.ready?
+                when :I_REBOOT
+                    # at the moment no OTA updates, so no implementation needed
+                    log_because_not_implemented("internal message", @message_content)
+                when :I_GATEWAY_READY
+                    i_gateway_ready
+                else
+                    $logger.error("unkown internal message: #{@message_content}")
+            end
         end
 
     end
@@ -244,7 +273,8 @@ class Message
 
     #internal msg stuff
     def i_id_request
-        @mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/id_request", "")
+        #@mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/id_request", "")
+        send_mqtt_msg()
         node = Node.new()
         node.save!
         send_serial_msg(nil, nil, nil, nil, INTERNALS[:I_ID_RESPONSE], node.id)
@@ -252,31 +282,59 @@ class Message
     end
 
     def i_id_response
-        @mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}", "#{node.id}" )
+        #@mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}", "#{node.id}" )
+        send_mqtt_msg(nil, nil, nil, nil, nil, node.id)
     end
 
     def i_gateway_ready
         @serial.set_ready
-        @mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}","")
+        #@mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}","")
+        send_mqtt_msg
     end
 
     def i_sketch_name
         node = Node.get(@node_id.to_i)
         node.sketch_name = @payload
         node.save!
-        @mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}", "#{@payload}")
+        #@mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}", "#{@payload}")
+        send_mqtt_msg
     end
 
     def i_sketch_version
         node = Node.get(@node_id.to_i)
         node.sketch_version = @payload
         node.save!
-        @mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}", "#{@payload}")
+        #@mqtt.put("#{@node_id}/#{@child_sensor_id}/internal/#{@sub_type}", "#{@payload}")
+        send_mqtt_msg
 
     end
 
 
 
+
+    
+
+    def log_because_not_implemented(thing, message)
+        $logger.error("not implemented #{thing} for message: #{message}")
+    end
+
+
+
+    
+
+
+    private 
+
+    def send_mqtt_msg(node_id = nil, child_sensor_id = nil, message_type = nil, ack = nil, sub_type = nil, payload = nil)
+        m_node_id = node_id.nil? ? @node_id : node_id
+        m_child_sensor_id = child_sensor_id.nil? ? @child_sensor_id : child_sensor_id
+        m_message_type = message_type.nil? ? @message_type : message_type
+        m_ack = ack.nil? ? @ack : ack
+        m_sub_type = sub_type.nil? ? @sub_type : sub_type
+        m_payload = payload.nil? ? @payload : payload
+        
+        @mqtt.put("#{m_node_id}/#{m_child_sensor_id}/#{m_message_type}/#{m_ack}/#{m_sub_type}", "#{m_payload}")
+    end
 
     def send_serial_msg(node_id = nil, child_sensor_id = nil, message_type = nil, ack = nil, sub_type = nil, payload = nil)
         m_node_id = node_id.nil? ? @node_id : node_id
@@ -291,18 +349,21 @@ class Message
 
     end
 
-    def log_because_not_implemented(thing, message)
-        $logger.error("not implemented #{thing} for message: #{message}")
-    end
-
-
-
-    
-
-
-    private 
     def self.parseable?(message_content)
         Message.splitt_message(message_content).length == 6 ? true : false
+    end
+
+    def self.mqtt_parseable?(message_content)
+        result = true
+        result = false if message_content.length != 2
+        result = false if Message.splitt_mqtt_message(message_content).length != 7
+        result
+    end
+
+    def self.splitt_mqtt_message(message_content)
+        ary = message_content[0].split("/")
+        ary.push(message_content[1])
+        ary
     end
     
     def self.splitt_message(message_content)

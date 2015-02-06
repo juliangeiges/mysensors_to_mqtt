@@ -1,9 +1,11 @@
 require 'mqtt'
 
 class Mqtt
+    attr_accessor :serial
 
     def initialize(settings)
         @settings = settings
+        @serial = nil
         @broker_header = {
             :host => @settings.broker_ip,
             :port => @settings.broker_port,
@@ -11,6 +13,10 @@ class Mqtt
             :password => @settings.broker_pass
         }
         @client = MQTT::Client.connect(@broker_header)
+    end
+
+    def connected?
+        @client.connected?
     end
 
     def reconnect
@@ -43,10 +49,25 @@ class Mqtt
     end
 
     def get
-        #todo
+        Thread.new{
+            puts "started mqtt getter"
+            while true
+                reconnect 
+                begin
+                    @client.get("#{@settings.client_name}/#") do |topic,message|
+                        ary = []
+                        ary.push(topic)
+                        ary.push(message.chomp)
+                        $logger.error("non parsable mqtt message #{ary}") if !Message.new(ary,@serial, self, true)
+                    end
+                
+                rescue Exception => e
+                  puts "get rescued + #{e}"
+                end
+                sleep 0.2
+            end
+        }
     end
-
-
 
 
 

@@ -20,17 +20,29 @@ $logger.formatter = proc { |severity, datetime, progname, msg|
 }
 $logger.level = Logger.const_get Settings.main.logger_level
 
-# node =  Node.new("lol", "blub", "Fucker")
+# node =  Node.new("lol", "blub", "lil")
 # node.save!
 # puts Node.all.map {|x| x.id}
 
 # begin 
     mqtt = Mqtt.new(Settings.mqtt)
-   
-
+    while !mqtt.connected?
+        sleep 1
+    end
     serial = MysensorsSerial.new(Settings.serial, mqtt)
-
     serial.reader
+    while !serial.ready?
+        sleep 1
+    end
+    mqtt.serial = serial
+    
+    mqtt.get
+
+    #serial.send("3;1;1;0;2;11011_10000_1")
+
+    loop do 
+        sleep 1
+    end
     
 
 # rescue Interrupt
