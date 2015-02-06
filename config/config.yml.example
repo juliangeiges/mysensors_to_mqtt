@@ -1,0 +1,15 @@
+main:
+    logger_level: DEBUG # UNKNOWN, FATAL, ERROR, WARN, INFO, DEBUG -> 
+serial:
+    port: /dev/cu.usbmodem1421
+    baudrate: 115200
+    data_bits: 8
+    stop_bits: 1
+    debug: true
+
+mqtt:
+    broker_ip: 
+    broker_port: 
+    broker_name: 
+    broker_pass: 
+    client_name: mysensorsgateway1
