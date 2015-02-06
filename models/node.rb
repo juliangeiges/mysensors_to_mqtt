@@ -2,8 +2,8 @@ require 'yaml/store'
 
 class Node
     attr_accessor :id, :sub_type, :comment, :name, :store, :lib_version, :sketch_name, :sketch_version
-
-    STORE = YAML::Store.new "storage/nodes.yml"
+    
+    STORE = YAML::Store.new $pwd + "/storage/nodes.yml"
 
     def initialize(sub_type = nil, comment= nil, name = nil)
         #@id = Node.serve_id

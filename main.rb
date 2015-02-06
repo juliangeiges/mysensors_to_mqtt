@@ -1,6 +1,7 @@
 require 'bundler/setup'
 require 'logger'
 require 'settingslogic'
+$pwd  = File.dirname(File.expand_path(__FILE__))
 
 require_relative 'lib/message'
 require_relative 'lib/mqtt'
@@ -9,8 +10,8 @@ require_relative 'models/node'
 
 
 
-$pwd  = File.dirname(File.expand_path(__FILE__))
-$logger = Logger.new('logs/mysensors_to_mqtt.log', 'weekly')
+
+$logger = Logger.new( $pwd + '/logs/mysensors_to_mqtt.log', 'weekly')
 class Settings < Settingslogic
   source ($pwd + "/config/config.yml")
 end
@@ -20,9 +21,6 @@ $logger.formatter = proc { |severity, datetime, progname, msg|
 }
 $logger.level = Logger.const_get Settings.main.logger_level
 
-# node =  Node.new("lol", "blub", "lil")
-# node.save!
-# puts Node.all.map {|x| x.id}
 
 # begin 
     mqtt = Mqtt.new(Settings.mqtt)
@@ -35,10 +33,8 @@ $logger.level = Logger.const_get Settings.main.logger_level
         sleep 1
     end
     mqtt.serial = serial
-    
-    mqtt.get
 
-    #serial.send("3;1;1;0;2;11011_10000_1")
+    mqtt.get
 
     loop do 
         sleep 1
