@@ -23,3 +23,5 @@ Temporary Items
 logs/*
 storage/*
 /config/config.yml
+
+!*.keep
