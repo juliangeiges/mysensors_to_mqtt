@@ -55,8 +55,8 @@ class Message
     SET_REQ = {
         :V_TEMP =>      0,   #Temperature
         :V_HUM =>       1,   #Humidity
-        :V_LIGHT =>     2,   #Light status. 0=off 1=on
-        :V_DIMMER =>    3,   #Dimmer value. 0-100%
+        :V_STATUS =>     2,   #Light status. 0=off 1=on
+        :V_PERCENTAGE =>    3,   #Dimmer value. 0-100%
         :V_PRESSURE =>  4,   #Atmospheric Pressure
         :V_FORECAST =>  5,   #Whether forecast. One of "stable", "sunny", "cloudy", "unstable", "thunderstorm" or "unknown"
         :V_RAIN =>      6,   #Amount of rain
@@ -93,6 +93,14 @@ class Message
         :V_DUST_LEVEL =>    37,  #Dust level
         :V_VOLTAGE =>   38,  #Voltage level
         :V_CURRENT =>   39,  #Current level
+
+        :V_RGB   =>     40,  #RGB value transmitted as ASCII hex string (I.e "ff0000" for red)    S_RGB_LIGHT, S_COLOR_SENSOR
+        :V_RGBW  =>     41,  #RGBW value transmitted as ASCII hex string (I.e "ff0000ff" for red + full white)    S_RGBW_LIGHT
+        :V_ID    =>     42,  #Optional unique sensor id (e.g. OneWire DS1820b ids)    S_TEMP
+        :V_UNIT_PREFIX   => 43,  #Allows sensors to send in a string representing the unit prefix to be displayed in GUI. This is not parsed by controller! E.g. cm, m, km, inch. S_DISTANCE, S_DUST, S_AIR_QUALITY
+        :V_HVAC_SETPOINT_COOL    => 44,  #HVAC cold setpoint  S_HVAC
+        :V_HVAC_SETPOINT_HEAT    => 45,  #HVAC/Heater setpoint    S_HVAC, S_HEATER
+        :V_HVAC_FLOW_MODE    => 46,  #Flow mode for HVAC ("Auto", "ContinuousOn", "PeriodicOn")   S_HVAC
     }
 
 
