@@ -122,6 +122,10 @@ class Message
         :I_SKETCH_VERSION =>    12,  #Optional sketch version that can be reported to keep track of the version of sensor in the Controller GUI.
         :I_REBOOT =>        13,  #Used by OTA firmware updates. Request for node to reboot.
         :I_GATEWAY_READY => 14,  #Send by gateway to controller when startup is complete.
+    
+        :I_REQUEST_SIGNING   => 15,  #Used between sensors when initialting signing.
+        :I_GET_NONCE => 16,  #Used between sensors when requesting nonce.
+        :I_GET_NONCE_RESPONSE    => 17,  #Used between sensors for nonce response.
     }
 
     def initialize(message_content, serial, mqtt, output)
