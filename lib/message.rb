@@ -15,6 +15,7 @@ class Message
         :S_MOTION =>    1,   #Motion sensors
         :S_SMOKE =>     2,   #Smoke sensor
         :S_LIGHT =>     3,   #Light Actuator (on/off)
+        :S_BINARY =>    3,   #Binary device (on/off), Alias for S_LIGHT
         :S_DIMMER =>    4,   #Dimmable device of some kind
         :S_COVER =>     5,   #Window covers or shades
         :S_TEMP =>      6,   #Temperature sensor
@@ -29,7 +30,7 @@ class Message
         :S_DISTANCE =>  15,  #Distance sensor
         :S_LIGHT_LEVEL =>   16,  #Light sensor
         :S_ARDUINO_NODE =>  17,  #Arduino node device
-        :S_ARDUINO_RELAY => 18,  #Arduino repeating node device
+        :S_ARDUINO_REPEATER_NODE => 18,  #Arduino repeating node device
         :S_LOCK =>      19,  #Lock device
         :S_IR =>        20,  #Ir sender/receiver device
         :S_WATER =>     21,  #Water meter
@@ -37,6 +38,17 @@ class Message
         :S_CUSTOM =>    23,  #Use this for custom sensors where no other fits.
         :S_DUST =>      24,  #Dust level sensor
         :S_SCENE_CONTROLLER =>  25,  #Scene controller device
+
+        :S_RGB_LIGHT  =>        26,          #RGB light   V_RGB, V_WATT
+        :S_RGBW_LIGHT    =>     27,          #RGBW light (with separate white component)  V_RGBW, V_WATT
+        :S_COLOR_SENSOR  =>     28,          #Color sensor    V_RGB
+        :S_HVAC  =>             29,          #Thermostat/HVAC device  V_HVAC_SETPOINT_HEAT, V_HVAC_SETPOINT_COLD, V_HVAC_FLOW_STATE, V_HVAC_FLOW_MODE, V_HVAC_SPEED
+        :S_MULTIMETER    =>     30,          #Multimeter device   V_VOLTAGE, V_CURRENT, V_IMPEDANCE
+        :S_SPRINKLER =>         31,          #Sprinkler device    V_STATUS (turn on/off), V_TRIPPED (if fire detecting device)
+        :S_WATER_LEAK    =>     32,          #Water leak sensor   V_TRIPPED, V_ARMED
+        :S_SOUND =>             33,          #Sound sensor    V_LEVEL (in dB), V_TRIPPED, V_ARMED
+        :S_VIBRATION =>         34,          #Vibration sensor    V_LEVEL (vibration in Hz), V_TRIPPED, V_ARMED
+        :S_MOISTURE  =>         35,          #Moisture sensor V_LEVEL (water content or moisture in percentage?), V_TRIPPED, V_ARMED
     }
 
     #When a set or request message is being sent, the sub-type has to be one of the following:
